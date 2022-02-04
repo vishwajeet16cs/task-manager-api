@@ -1,0 +1,300 @@
+
+EX-1>
+
+    const mongoose = require('mongoose')
+
+
+mongoose.connect("mongodb://127.0.0.1:27017/task-manager-api",{
+    useNewUrlParser:true,
+    useCreateIndex:true
+})
+
+const User=mongoose.model("User",{
+    name:{
+        type:String
+    },
+    age:{
+        type:Number
+    }
+})
+
+const me=new User({
+    name:"Vishwajeet",
+    age:27// can't give string to type no 
+})
+me.save().then((me)=>{
+    console.log(me)
+}).catch((error)=>{
+    console.log("Error! ",error)
+})
+
+O/P>{ _id: 61f7476e691c1105347f2cf8, name: 'Vishwajeet', age: 27,: 'Vishwajeet', age: 27, __v: 0 }
+Notes:- can't assigne string to number (age)
+
+
+EX-2> -----------------------------------------
+NOtes:- Task is save as tasks in mongoos
+
+const Task=mongoose.model("Task",{
+    description:{
+        type:String,
+    },
+    completed:{
+        type:Boolean
+    }
+})
+
+const task = new Task({
+    description:"comp it by before friday",
+    completed:false 
+})
+
+//save return promisess
+task.save().then((task)=>{
+    console.log(task)
+}).catch((error)=>{
+    console.log("Error! ",error)
+})
+
+O/P>
+{
+  _id: 61f751989fd73e4148991bca,
+  description: 'comp it by before friday',
+  completed: false,
+  __v: 0
+}
+
+
+-----------Data Validation & Data Sanitization-------
+ Data Validation - we can force some rule 
+    EX-> age >18(age should be > 18)
+        Lime Email Validation,Mobile no Validation
+
+Data Sanitization-> Alter the data before saving it 
+    Ex-> removing the space aroud the user name
+
+
+EX-1>
+
+const User=mongoose.model("User",{
+    name:{
+        type:String,
+        required:true,// if name is not there it will throw an error
+    },
+    age:{
+        type:Number
+    }
+})
+
+
+const me=new User({
+     
+})
+me.save().then((me)=>{
+    console.log(me)
+}).catch((error)=>{
+    console.log("Error! ",error)
+})
+
+O/P> Error Name is Required
+
+if Name is there and age is not then there is no error data are 
+stored in the database
+
+EX-2>
+
+const User=mongoose.model("User",{
+    name:{
+        type:String,
+        required:true,
+    },
+    age:{
+        type:Number,
+        validate(value){
+            if(value<0){
+                throw new Error(" Age Must be an Positive no")
+            }
+        }
+    }
+})
+
+validate(value)->here value is what ever we provide to it 
+here we are validating age and it must be an +ve int
+
+
+EX2>
+
+email:{
+        type:String,
+        required:true,
+        validate(value){
+            if(!validator.isEmail(value)){
+                throw new Error("Email is invalid")
+            }
+        }
+    },
+
+> required feild
+>we are using validator to validate email 
+        > Wrong email will give error -Vish@
+        > Wirte email will stored in data bser Vish@gmail.comp
+
+
+EX-3>
+
+const Task=mongoose.model("Task",{
+        description:{
+            type:String,
+            required:true,
+            trim:true,
+        },
+        completed:{
+            type:Boolean,
+            default:false
+        }
+    })
+
+const task = new Task({
+    // description:"comp it by before friday"
+})
+
+O/P>error
+message: 'Task validation failed'
+
+
+EX-4>
+
+const Task=mongoose.model("Task",{
+        description:{
+            type:String,
+            required:true,
+            trim:true,
+        },
+        completed:{
+            type:Boolean,
+            default:false
+        }
+    })
+
+const task = new Task({
+    description:"Eat lunch"
+})
+
+O/P>by default completed:false
+{
+  completed: false,
+  _id: 61f76c1737f79a5860c91f25,
+  description: 'Eat lunch',
+  __v: 0
+}
+
+-------------------REST API-----------------------------------
+
+Representational State Transfer - Application Programming Interface(REST API ReSTful API)
+
+
+
+-------------Resource Creation EndPoints---------
+install nodemon->npm i nodemon@1.18.9 --save-dev
+
+install Express->npm i express@4.16.4
+
+create index.js
+
+do setup in package.json -- script
+->remove tests
+
+
+
+EX-3>
+const express = require("express")
+
+const app= express()
+const port =process.env.PORT||3000
+
+app.use(express.json())
+
+app.post("/users",(req,res)=>{
+    console.log(req.body)
+    res.send("testing!")
+})
+
+app.listen(port,()=>{
+    console.log(`Server is up on port ${port}`)
+})
+
+>O/P>>
+
+Server is up on port 3000
+{
+  name: 'Vishwajeet Kumar',
+  email: 'vishwajeet@gmail.com',
+  password: '1234asd'
+}
+
+
+
+//---------------------91---------------------
+
+app.get('/user',(req,res)=>{
+     User.find({})// {}(emty obj)-> featch all User from data base
+})
+
+
+
+----------Resourrce Reading Endpoints--------------------------
+
+EX-1> get by id
+
+app.get("/tasks/:id",(req,res)=>{
+    const _id=req.params.id
+    Task.findById(_id).then((task)=>{
+        res.send(task)
+    }).catch((e)=>{
+        res.status(400).send(e.message)
+    })
+})
+
+O/P>GET-http://localhost:3000/tasks/61f76aabd1b24b2b78511c8f
+
+{
+    "completed": false,
+    "_id": "61f76aabd1b24b2b78511c8f",
+    "description": "comp it by before friday",
+    "__v": 0
+}
+
+
+EX-2>
+
+app.get('/tasks',(req,res)=>{
+    const _id=req.params.id
+    Task.find({}).then((tasks)=>{
+        res.send(tasks)
+    }).catch((e)=>{
+        res.status(500).send(e.message)
+    })
+})
+
+O/P>http://localhost:3000/tasks
+
+[
+    {
+        "completed": false,
+        "_id": "61f76aabd1b24b2b78511c8f",
+        "description": "comp it by before friday",
+        "__v": 0
+    },
+    {
+        "completed": false,
+        "_id": "61f76c1737f79a5860c91f25",
+        "description": "Eat lunch",
+        "__v": 0
+    },
+    {
+        "completed": false,
+        "_id": "61f784baf850604b08263906",
+        "description": "Eat lunch",
+        "__v": 0
+    }
+]

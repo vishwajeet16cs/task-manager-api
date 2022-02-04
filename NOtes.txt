@@ -1,0 +1,213 @@
+Doc list->>https://mongodb.github.io/node-mongodb-native/3.1/api/Collection.html
+
+
+
+Name	Type	Description
+insertedCount	Number	
+The total amount of documents inserted.
+
+ops	Array.<object>	
+All the documents inserted using insertOne/insertMany/replaceOne. Documents contain the _id field if forceServerObjectId == false for insertOne/insertMany
+
+insertedIds	Object.<Number, ObjectId>	
+Map of the index of the inserted document to the id of the inserted document.
+
+connection	object	
+The connection object used for the operation.
+
+result	object	
+The raw command result object returned from MongoDB (content might vary by server version).
+
+Properties
+
+
+
+------------------------ObjectID--------------------------
+const id =  new ObjectID()// Create new Id
+console.log(id)
+console.log(id.getTimestamp())
+
+
+>>O/P://it will change every sec because time is chaning
+61f65af034d55a1dd85c5090
+2022-01-30T09:31:28.000Z//current time 
+
+
+const id =  new ObjectID()// Create new Id
+console.log(id.id.length)//12
+console.log(id.toHexString().length)//24
+
+It convert inhexa form to cut the Id length (24 to 12)
+
+
+>"_id" : ObjectId("61f61d29f9bf0e465816bf45")
+this function call convert the id back tolenth of 24
+- it is shown in this formate for batter readability
+------------------------------------------------
+
+---------------------find-----------------------
+EX-1.1>
+db.collection("users").findOne({name:"vishwajeet",age:1},(error,user)=>{
+        if(error){
+            return console.log("Unable to fetch data!")
+        }
+        console.log(user)
+})
+ O/P->null// no match found
+
+EX-1.2>
+db.collection("users").findOne({name:"vishwajeet"},(error,user)=>{
+        if(error){
+            return console.log("Unable to fetch data!")
+        }
+        console.log(user)
+})
+ O/P->{ _id: 61f61d29f9bf0e465816bf45, name: 'vishwajeet', age: 23 }// return 1st match found
+
+
+ Searching by Id
+ EX-1.3.1>
+db.collection("users").findOne({_id:"61f61d29f9bf0e465816bf45"},(error,user)=>{
+       if(error){
+           return console.log("Unable to fetch data!")
+       }
+       console.log(user)
+})
+
+
+O/P> Null// we can't give _id like this->_id:"61f61d29f9bf0e465816bf45"
+
+EX-1.3.2>
+db.collection("users").findOne({_id:new ObjectID("61f61d29f9bf0e465816bf45")},(error,user)=>{
+        if(error){
+            return console.log("Unable to fetch data!")
+        }
+        console.log(user)
+})
+
+O/P> { _id: 61f61d29f9bf0e465816bf45, name: 'vishwajeet', age: 23 }
+
+
+EX-1.4.1-----------FindMAny--
+
+db.collection("users").find({name:"vishwajeet"}).toArray((error,users)=>{
+        console.log(users)
+})
+
+O/P
+[
+  { _id: 61f61d29f9bf0e465816bf45, name: 'vishwajeet', age: 23 },
+  { _id: 61f620cd48fa1f409c507f35, name: 'vishwajeet', age: 23 }
+]
+
+
+EX-1.4.1------------count-------
+
+db.collection("users").find({name:"vishwajeet"}).count((error,count)=>{
+        console.log(count)
+})
+
+O/P
+2//return the count prop with same name
+
+
+-----------------------------------80>Update---------------
+
+updateMany(filter, update, options, callback)=>{Promise.<Collection~updateWriteOpResultObject>}
+
+Ex> 3.0.0
+
+const db=client.db(databaseName)
+    const updatePromise= db.collection("users").updateOne({
+        _id:new ObjectID("61f620e0a374f24444291b20")
+    },{
+        $set:{
+            name:"Poli bhaya",
+            age:26
+        }
+    })
+    updatePromise.then((result)=>{
+        console.log(result.ops)
+    }).catch((error)=>{
+        console.log(error)
+    })
+
+    O/P>-- It will change the name Amarjeet to Poili bhiya
+    modifiedCount: 1,
+  upsertedId: null,
+  upsertedCount: 0,
+  matchedCount: 1
+
+
+  EX> 3.1--->Incr
+
+   db.collection("users").updateOne({
+        _id:new ObjectID("61f620e0a374f24444291b20")
+    },{
+        $inc:{
+            age:1// will incremennt the age by one if 2 inc by 2
+        }
+    }).then((result)=>{
+        console.log(result.ops)
+    }).catch((error)=>{
+        console.log(error)
+    })
+
+O/p It will increase the age by one
+
+EX> 3.2---Tast Update---------
+
+db.collection("tasks").updateMany({completed:false},{
+        $set:{
+            completed:true
+        }
+    }).then((result)=>{
+        console.log(result)
+  }).catch((error)=>{
+    console.log(error)
+})
+
+O/P> all completed props in tastks updated to true
+
+ modifiedCount: 2,
+  upsertedId: null,
+  upsertedCount: 0,
+  matchedCount: 2
+
+
+--------------------Delete------------------
+Ex>4.0--deleteMany
+
+const db=client.db(databaseName)
+    db.collection("users").deleteMany({
+        name:"Amarjeet"
+    }).then((result)=>{
+        console.log(result)
+    }).catch((error)=>{
+        console.log(error)
+    }) 
+
+O/P>// It will delete all data whose name is Amarjeet
+deletedCount:4
+
+EX>4.1---deleteOne
+
+b.collection("users").deleteOne({
+        _id:new ObjectID("61f61d29f9bf0e465816bf45")
+    }).then((result)=>{
+        console.log(result)
+    }).catch((error)=>{
+        console.log(error)
+    })
+
+O/P> It will delete data for given id from db
+
+  deletedCount: 1
+
+
+
+  ------------------------Section-11----------------------------
+
+  >>>>>>>>>>Setting up Mongoose>>>>>>>>>>>>>>>>
+  
+  1> npm i mongoose@5.3.16

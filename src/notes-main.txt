@@ -1,0 +1,1164 @@
+------------bcrypt--hasing alogorithem 
+
+>hassing algorithem isnot reverseable
+ EX-hassing-->HEllo--crypt-->ndhb%$#^vgd%$E%^fxSgi4dik08X94tFi4PtMZJO63Y6
+ >decryption is not possible
+
+ EX-NonHassing--> hello--crypt-->ndjbh1b!@#nhbd--decrypt-->hello
+
+>npm i bcryptjs
+
+
+await bcrypt.hash(password,8)
+>2nd argument no of round hassing alogorithem is executed
+        - samll then easy to crack
+        -if long shlow down system
+
+EX-1>
+
+const bcrypt = require("bcryptjs")
+
+const myFunction = async()=>{
+    const password = "res12345!"
+    const hasedPassword =await bcrypt.hash(password,8)
+
+    console.log(password)
+    console.log(hasedPassword)
+
+    const isMatch=await bcrypt.compare("res12345!",hasedPassword)
+    console.log(isMatch)// true
+}
+myFunction()
+
+O/P>
+        res12345!
+        $2a$08$YhRI8nlXfW5wBRmfy/0yb.fxSgi4dik08X94tFi4PtMZJO63Y6.R
+
+
+Middleware-------------------------------------------------------------
+>Middleware (also called pre and post hooks) are functions which are 
+  passed control during execution of asynchronous functions. Middleware 
+  is specified on the schema level and is useful for writing plugins.
+
+
+-----------------Json Web Tocken--------------------------------------
+
+npm i jsonwebtoken@8.4.0
+
+>return new tocken
+ const tocken= jwt.sign({_id:"abcd123"},"thisismynewcource",{ expiresIn:"6days"})//return new tocken
+
+Obj(1st argument):-data
+    uniqe identifier (_id)
+2nd argument-- secrate to check tocken has not been tamper or alter
+                can be random searise of char
+                -also known as signature
+3rd argument--expires time as object {expiresIn:7days}
+                if tocken is expire -(expiredAt: 2022-02-01T22:47:22.000Z)
+                we will get this message 
+
+const jwt = require("jsonwebtoken")
+
+//creating tocken
+const myFunction = async()=>{
+    const tocken= jwt.sign({_id:"abcd123"},"thisismynewcource")//return new tocken
+    console.log("here is tocken",tocken)
+}
+myFunction()
+
+O/P:-here is tocken eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+eyJfaWQiOiJhYmNkMTIzIiwiaWF0IjoxNjQzNzU0NTE4fQ.
+yIOY7wPrh-oVQfMp4laQQGaX8I1XYvkLM_eL4aUeohg
+
+consist of 3part
+1st header(type of tocken EX- jwt & which algo use to generate it)
+2nd data what we have provided (it is "_id" in this case)
+
+
+https://www.base64encode.org/
+ > in this sit we can decode tocken 
+   2nd part of will be decode into {"_id":"abcd123","iat":1643754518}
+   "iat" -time when tocken is created
+
+To verify tocken-
+
+jwt.verify(tocken,"thisismynewcource")
+
+1st argument -token itself
+2nd argument- signature
+
+const data=jwt.verify(tocken,"thisismynewcource")
+console.log(data)
+O/P:-
+{ _id: 'abcd123', iat: 1643755280 }
+
+>if secrate key doesn't isMatch
+    -O/P > Error--invalid signature
+
+
+-----------------------107. Generating Authentication-------------------
+
+
+
+
+router.post("/users/login",async (req,res)=>{
+    try{
+        // will find the user if match else not
+        const user = await User.findByCredentials(req.body.email,req.body.password)
+        const tocken = await user.generateAuthToken()
+        res.send({user,tocken})
+    }
+    catch(e){
+        res.status(400).send()
+    }
+})
+
+userSchema.methods.generateAuthToken=async function(){
+    const user=this
+    const tocken=jwt.sign({_id:user._id.toString()},"thisismynewcource")
+    return tocken
+}
+ O/P>-----------
+{
+    "user": {
+        "age": 0,
+        "_id": "61f9aae6d980d646c8dbb5a1",
+        "name": "Amarheet singh",
+        "email": "amarjeet@gmail.com",
+        "password": "$2a$08$9qgG/goKRMzUjlJVskx7d.iPWK.JL53y6MC6Jd3GrYDdUGFepkzHu",
+        "__v": 0
+    },
+    "tocken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWY5YWFlNmQ5ODBkNjQ2YzhkYmI1YTEiLCJpYXQiOjE2NDM3NTYyOTh9.tReDZfMddhFsUb_BGa1X3xyr-qI1Kt-oOtCjCUaW1n4"
+}
+-----------------------
+
+
+-----------------------108. Express Middleware-----------------------
+
+Without Middleware: new request -> run route handler 
+
+With middleware: new request -> do something ->run route handlere
+
+        >we can perform some operation in between new Request and run route handler
+        >like validation , can setup a function & can perform any operation what ever we like
+        >can check valide authentication tocken or note
+
+        In DO SomeThing part > we have tun of controle
+            >allow or not allow route handler to run
+
+to registe new middleware to run we use -> app.use()
+    Express().use
+
+    >we can pass a function as an argument
+    >which will run in between newRequest->run route handler
+
+ EX-1>
+
+ app.use((req,res,next)=>{
+    console.log(req.method,req.path)
+    next()
+})   
+O/P depend on postman operation
+    post:-Users/login
+    O/p>POST /users/login
+    req.method-> POST
+    req.path->/users/login
+
+    Notes:->if next is not been call it will go for infinite loop
+    (will nevre going to return)
+    before next -> we can perform any operation we want
+
+EX-2>
+
+app.use((req,res,next)=>{
+    if(req.method=="GET"){
+        res.send("Get request is disabled")
+    }else{
+        next()
+    }
+})
+
+O/P> if method is GET
+     Get request is disabled// as a responce-check in postman
+
+EX-3>
+
+app.use((req,res,next)=>{
+ res.status(503).send("site is currently down. Check back soon!")
+})
+
+O/P> for every methods
+    site is currently down. Check back soon!
+
+
+
+----------------------------109. Accepting Authentication Tokens------------------------------------------------
+
+EX-1>
+
+-----auth.js-----------
+const auth = async(req,res,next)=>{
+    console.log("auth midilware")
+    next()
+}
+
+module.exports=auth
+
+------user.js/module------------
+
+const auth = require("../middleware/auth")
+
+//here as 2nd parameter -> middleware function
+Notes:- if some do get request (/users) then it will gothrough auth(middleware-function)
+
+
+router.post('/users',auth,async(req,res)=>{
+const user= new User(req.body)
+try{
+    await user.save()
+    const tocken = await user.generateAuthToken()
+    res.status(201).send({user,tocken})
+}
+catch(e){
+    res.status(400).send(e)
+}
+})
+
+
+Notes:- each time user login tocken is generated
+
+
+EX-2>--------------
+
+const auth = async(req,res,next)=>{
+    try{
+        const tocken = req.header("Authorization")// name of the header we want to access to
+        
+    }catch(e){
+        res.status(401).send({error:"Please authenticate."})
+    }
+}
+
+module.exports=auth
+
+O/P> getting header which we have set in postman header with name <"Authorization">
+ Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+eyJfaWQiOiI2MWY5ZmNmY2IwZjc1ZTAxMjBiZTlkYzAiLCJpYXQiOjE2NDM3NzMzMDh9.
+z-QLMUzG88HDLBTkGMFUZ_ba-Tu-YM2iqYF4uwE7ZQQ
+-------------------
+
+I> const tocken = req.header("Authorization")// name of the header we want to access to
+
+II>const tocken = req.header("Authorization").replace("Bearer","")
+        console.log(tocken)
+    
+    O/P> Replace Bearer-""(nothing)
+        eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.
+        eyJfaWQiOiI2MWY5ZmNmY2IwZjc1ZTAxMjBiZTlkYzAiLCJpYXQiOjE2NDM3NzMzMDh9.
+        z-QLMUzG88HDLBTkGMFUZ_ba-Tu-YM2iqYF4uwE7ZQQ
+
+
+----------------110.-Advanced Postman-------------------------------
+
+Add Enviroment
+ s1> go to setting
+ s2>click add
+ s3> pick name
+ s4> set variabel -url
+ s5> set Initial value
+ s6> click add
+ s7> start using {{url name or s4 variabel name }}/users
+
+
+
+
+
+------------------111. Logging Out--------------------------
+
+EX-1>remove from one device
+
+router.post('/users/logout',auth,async(req,res)=>{
+    console.log("log out is working")
+    try{
+        req.user.tockens=req.user.tockens.filter((tocken)=>{
+            return tocken.tocken!==req.tocken
+        })
+        await req.user.save()
+
+        res.send()
+    }catch(e){
+        res.status(500).send()
+    }
+})
+
+-----------------------------------------
+EX-2>
+
+router.post("/users/logoutAll",auth,async(req,res)=>{
+    // res.send("logoutall")
+    try{
+        req.user.tockens=[]
+        await req.user.save()
+        res.send()
+    }catch(e){
+        res.status(500).send()
+    }
+})
+
+--it make tocken array empty -no more tocken (remove account from all account)
+---------------------------------------------
+
+
+
+
+
+-------------------112. Hiding Private Data---------------------
+
+EX-1> bello code will hide password and tokens -(while sending res it doesn't send password and token)
+
+userSchema.methods.generateAuthToken=function(){
+    const user = this 
+    const userObject = user.toObject()
+
+    delete userObject.password
+    delete userObject.tockens
+
+    return userObject
+}
+
+
+router.post("/users/login",async (req,res)=>{
+    // console.log("Request come from login")
+    try{
+        // will find the user if match else not
+        const user = await User.findByCredentials(req.body.email,req.body.password)
+        const tocken = await user.generateAuthToken()
+        res.send({user:user.getPublicProfile(),tocken})
+    }
+    catch(e){
+        res.status(400).send()
+    }
+})
+
+EX-2>it will hide password and tocken -(while sending res it doesn't send password and token)
+
+userSchema.methods.toJSON=function(){
+    const user = this 
+    const userObject = user.toObject()
+
+    delete userObject.password
+    delete userObject.tockens
+
+    return userObject
+}
+
+router.post("/users/login",async (req,res)=>{
+    // console.log("Request come from login")
+    try{
+        // will find the user if match else not
+        const user = await User.findByCredentials(req.body.email,req.body.password)
+        const tocken = await user.generateAuthToken()
+        res.send({user:user,tocken})
+    }
+    catch(e){
+        res.status(400).send()
+    }
+})
+
+EX-4> toJson working
+
+const pet={
+    name:"tom",
+    address:"patna"
+}
+pet.toJSON=function(){
+    console.log(this)// {"name":"tom","address":"patna"}
+    return this 
+}
+console.log(JSON.stringify(pet))// { name: 'tom', address: 'patna', toJSON: [Function (anonymous)] }
+
+O/P>
+    { name: 'tom', address: 'patna', toJSON: [Function (anonymous)] }
+    {"name":"tom","address":"patna"}
+
+
+EX-5> -- return empty Object {}
+
+const pet={
+    name:"tom",
+    address:"patna"
+}
+pet.toJSON=function(){
+    console.log(this)//{ name: 'tom', address: 'patna', toJSON: [Function (anonymous)] }
+    return {} 
+}
+console.log(JSON.stringify(pet))//{}
+
+O/P>
+
+{ name: 'tom', address: 'patna', toJSON: [Function (anonymous)] }
+{}
+
+
+------------------113. Authenticating User Endpoints-----------------------
+
+EX-1
+
+router.delete("/users/me",auth,async (req,res)=>{
+
+    try{
+       //const user=await User.findByIdAndDelete(req.user._id)
+       
+      /* if(!user){
+           return res.status(404).send()
+       } */
+        req.user.remove()// removing selected user
+       res.send(req.user)//send deleated data as response
+    }catch(e){
+        res.status(500).send(e )
+    }
+})
+
+here we are getting _id from auth
+ auth is only chacking user is there or not so we have commented out 
+ checking user is there or not
+
+
+
+
+
+ 
+-----------------------------114. The User/Task Relationship---------------------------
+
+>create owner prop in Task- model
+        owner:{
+         type:mongoose.Schema.Types.ObjectId,
+         required:true
+     }
+
+>while creating and saving new task attach user id to it
+
+        router.post("/tasks",auth,async(req,res)=>{
+            const task=new Task({
+            ...req.body,
+            owner:req.user._id//adding user id
+        })
+            try{
+                await task.save();
+                res.status(201).send(task)
+            }
+            catch(e){
+             res.status(400).send(e)
+            }       
+        })
+    getting user id with the help of middleware-auth
+
+
+EX-2>-------Relate TAsk with user
+
+owner:{
+         type:mongoose.Schema.Types.ObjectId,
+         required:true,
+         ref:"User"// ref to this fild to another model (TAsk- User)
+     }
+
+const Task = require("./models/tasks")
+
+const main = async ()=>{
+    const task= await Task.findById("61fb4d4f5c41d16fb4e11da2")//id of TASK
+    await task.populate("owner").execPopulate()//find the user related to this task
+    console.log(task.owner)
+}
+main()
+
+O/P>
+
+{
+  age: 0,
+  _id: 61fb4d475c41d16fb4e11da0,
+  name: 'nishu',
+  email: 'nishu@gmail.com',
+  password: '$2a$08$8pE3Zpeok3k7jDvGwHgUQ.RzW29G9yvsmSHVcJuDHwcWHBhNPN1E6',
+  tockens: [
+    {
+      _id: 61fb4d475c41d16fb4e11da1,
+      tocken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWZiNGQ0NzVjNDFkMTZmYjRlMTFkYTAiLCJpYXQiOjE2NDM4NTkyNzF9.W9nSfjcdDyR-c0mkytYM2m69OrU8Nzv4ixt-zGqelUc'
+    }
+  ],
+  __v: 1
+}
+ --------------------User-connect to task---------------------
+  
+  virtual property - not data stored in data base
+                    - relationship between tow entity
+                    (User and Task)
+                    -we are not changing what we store for user doc
+                    -it is just a way for mongoose to figureout how these two thingh is related
+
+
+ Takes 2 argument
+    1st -name of the virtual feild
+    2nd - Obj which contain 
+            >ref:"Task"// ref to Task
+            >localField:""
+            >foreignField:"" 
+
+
+Owner -in task is a feild of Task whish is stored in data base
+        - and ref to User
+virtual- is only for ref TAsk from user but not to be stored
+
+foreignField: name of the field on the other thing in this case Task create relationship set(öwner)
+
+localField:where local data is stored- here it is owner objId in task
+
+EX-3>------------------------   
+userSchema.virtual("tasks",{
+    ref:"Task",
+    localField:"_id",
+    foreignField:'owner'
+})
+
+
+const Task = require("./models/tasks")
+const User = require("./models/user")
+
+const main = async ()=>{
+    /* const task= await Task.findById("61fb4d4f5c41d16fb4e11da2")
+    await task.populate("owner").execPopulate()//find the user related to this task
+    console.log(task.owner) */
+
+    const user = await User.findById("61fb4d475c41d16fb4e11da0")
+     await user.populate("tasks").execPopulate()
+    console.log(user.tasks)
+}
+main()
+
+
+O/P>
+
+[
+  {
+    completed: false,
+    _id: 61fb4d4f5c41d16fb4e11da2,
+    description: 'Finish Node.js cource',
+    owner: 61fb4d475c41d16fb4e11da0,
+    __v: 0
+  }
+]
+User Id 61fb4d475c41d16fb4e11da0
+TAsk { description: 'finish as shoon as possible' }
+{
+  completed: false,
+  _id: 61fb57ca374abe7598404249,
+  description: 'finish as shoon as possible',
+  owner: 61fb4d475c41d16fb4e11da0
+}
+-------------------
+
+
+-------------------------115. Authenticating Task Endpoints-----------------------
+
+EX-1>
+
+router.get("/tasks/:id",auth,async (req,res)=>{
+    const _id=req.params.id
+    try{
+        const task= await Task.findOne({_id,owner:req.user._id})//note1-check bellow
+        if(!task){
+            return res.status(404).send();
+        }
+        res.send(task)
+    }
+    catch(e){
+        res.status(400).send(e)
+    }
+})
+
+note1-find task only when -owner is login (match owner id as well)
+        + _id of task
+        
+
+EX-2>
+
+router.get('/tasks',auth,async (req,res)=>{
+
+    try{
+        // const tasks= await Task.find({owner:req.user._id})
+        // res.send(tasks)
+        console.log(req.user)// O/P is below
+        await req.user.populate("tasks").execPopulate()
+        res.send(req.user.tasks)
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
+
+both wey is possible  commented and uncommented one
+O/P->
+
+{
+  age: 0,
+  _id: 61fb595d3e3f0771ec2490ff,
+  name: 'vishwajeet',
+  email: 'vishwajeet@gmail.com',
+  password: '$2a$08$xJ.eQQnvS8I4auShS4uhuu/gCrhKMFaa/8FmyLJp/Vx7397WhzC8y',
+  tockens: [
+    {
+      _id: 61fb595d3e3f0771ec249100,
+      tocken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWZiNTk1ZDNlM2YwNzcxZWMyNDkwZmYiLCJpYXQiOjE2NDM4NjIzNjV9.sYwVy_1YW87ahV4Kxz46tLx3JHcPmEq0K-jFOO8NioI'
+    },
+    {
+      _id: 61fb5a6c3ee2bc74b4cf73b8,
+      tocken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWZiNTk1ZDNlM2YwNzcxZWMyNDkwZmYiLCJpYXQiOjE2NDM4NjI2MzZ9.REZSV6scUfOgE47LvCYido1HcLuo8nTAF220oQeR6bI'
+    },
+    {
+      _id: 61fb5aa33ee2bc74b4cf73b9,
+      tocken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWZiNTk1ZDNlM2YwNzcxZWMyNDkwZmYiLCJpYXQiOjE2NDM4NjI2OTF9.Z6UPCRYGSLqvw-bPSMjzzXIMpqHO0s0yb6HAB216fI0'
+    },
+    {
+      _id: 61fb622fbf0ed52c18edde0c,
+      tocken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MWZiNTk1ZDNlM2YwNzcxZWMyNDkwZmYiLCJpYXQiOjE2NDM4NjQ2MjN9.NwUQQg_PeGchoREMqwknFFEctA5WrEkALZeb458LbWg'
+    }
+  ],
+  __v: 4
+}
+
+
+--------------------116. Cascade Delete Tasks-----------------
+
+--if some in it deleting there user account then there task should automatically deleted 
+
+This code is for when user delete his/her id then there task is automatically deleted 
+
+const Task = request("./tasks.js")
+
+//Delete user tasks when user is removed(midilware function)
+userSchema.pre("remove",async function(next){
+    const user = this 
+    await Task.deleteMany({ owner: user._id})
+    next()
+})
+
+const User=mongoose.model("User",userSchema)
+
+  >deleteMany- because one user can have many task
+  >will delete every single task where owner : user._id
+
+
+----------------118. Working with Timestamps---------------------
+
+TimeStamps =>give us aditional info about data when they have creatde and when they have last updated
+        - we can add it as an additional fild in user like name ,email,password e.t.c
+
+        only work with schema 1st we have to create schema then add TimeStamps
+        > pass as 2nd argument to schema
+        > timestamps help us to short data filter data e.t.c
+
+EX-1>---------
+const taskSchema=new mongoose.Schema({
+    description:{
+        type:String,
+        required:true,
+        trim:true,
+     }
+},{
+    timestamps:true
+})
+
+--------------------119. Filtering Data----------------------
+
+--> a user can have hamy task featching all of them can slowdown the system,
+        > mey be user also dont want all data , only want some data 
+        >filtering help user to find particular data and system efficiency is also maintain
+
+        >GET/tasks? completed =false-->only for incomp task
+        we are using query string(?) to shor particular data
+
+        >req.user.populate({ path:'task'}).execPopulate()
+                    &
+        req.user.populate('task').execPopulate()
+        both are same
+
+
+EX-1>
+
+//GET/tasks? completed =false
+router.get('/tasks',auth,async (req,res)=>{
+    try{
+        // const tasks= await Task.find({owner:req.user._id})
+        // res.send(tasks)
+        console.log(req.user)
+        await req.user.populate({
+            path:'tasks',
+            match:{
+                completed:true
+            }
+        }).execPopulate()
+        res.send(req.user.tasks)
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
+it will return whose completed prop is true
+-----------------
+
+
+EX-2>--
+
+//GET/tasks? completed =false
+router.get('/tasks',auth,async (req,res)=>{
+    const match ={}
+    if(req.query.completed){
+        match.completed=req.query.completed==="true"// to make it boolian value
+    }
+    console.log("match data",match)
+
+    try{
+        await req.user.populate({
+            path:'tasks',
+            match
+        }).execPopulate()
+        res.send(req.user.tasks)
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
+//tasks?commented=true
+    return only comp tasks
+/tasks?false 
+    return only incomp tasks
+
+
+
+--------------------120. Paginating Data----------------------
+
+limit = how much data we want in first page
+skip = how much data we want to skip 
+
+/GET/task?limit=10&skip=10---1st 10 result(1nd page)
+/GET/task?limit=10&skip=10---2st 10 result(2nd page)
+
+
+await req.user.populate({
+            path:'tasks',
+            match,
+            options:{
+                limit:2//note-1
+            }
+
+        }).execPopulate()
+note-1>here it will show only 1st 2 result because limit is 2
+
+   >options:{limit:parseInt(req.query.limit)}
+         parseInt convert string value which contain to integer "2"-->2        }
+
+
+EX-2>--------
+
+//GET/tasks? completed =false
+//GET/task?limit=10&skip=0----------limit skip
+router.get('/tasks',auth,async (req,res)=>{
+    const match ={}
+    if(req.query.completed){
+        match.completed=req.query.completed==="true"// to make it boolian value
+    }
+    console.log("match data",match)
+
+    try{
+        await req.user.populate({
+            path:'tasks',
+            match,
+            ---------------IMP---------------------
+            options:{
+                limit:parseInt(req.query.limit),
+                skip:parseInt(req.query.skip)
+            }
+            ------------------------------------
+        }).execPopulate()
+        res.send(req.user.tasks)
+    }catch(e){
+        res.status(500).send(e)
+    }
+})
+
+in above code I have set query string(?) skip and limit whis help us to paginate 
+in diff pattern by setting value to limit and skip
+
+--------------121. Sorting Data--------------------
+
+//GET /tasks?sortBY=createdAt_asc-- when created & ascending order 
+//GET /tasks?sortBY=createdAt:asc-- when created & ascending order
+//GET /tasks?sortBY=createdAt_desc-- dscending order
+//GET /tasks?sortBY=createdAt:desc-- dscending order
+
+options:{
+                limit:parseInt(req.query.limit),
+                skip:parseInt(req.query.skip),
+                sort:{
+                    createdAt:1// fo ascending 
+                    createdAt:-1// fo dscending 
+                }
+            }
+
+sort:{
+    completed:-1
+}
+
+it will show comp task 1st followed by incomp task
+
+sort:{
+    completed:1
+}
+
+it will show incomp(false) task 1st followed by completed task
+
+EX-4>
+
+
+if(req.query.sortBy){
+        const parts=req.query.sortBy.split(':')-------------------//[ 'createdAt', 'desc' ]
+        const partscheck=req.query.sortBy.split()----//[ 'createdAt:desc' ]
+        const partscheck2=req.query.sortBy----------------//createdAt:desc
+
+        sort[parts[0]] = parts[1] === 'desc' ? -1 :1
+        console.log(sort[parts[0]])-------------//-1
+        console.log(parts[1])--------------//desc
+        console.log(parts[0])----------------//createdAt
+    }
+
+
+------------------------123. Adding Support for File Uploads---------------------------
+
+Express by default doesn't support file upload 
+
+npm i multer
+Multer-Multer is a node.js middleware for handling multipart/form-data, 
+       which is primarily used for uploading files. 
+       It is written on top of busboy for maximum efficiency.
+
+----------------
+const multer = require('multer')
+const upload = multer({
+    dest:"images"
+})
+
+dest-distination 
+image-name of the folde where all the upload should be stored
+end point- where client will be uploading these file
+
+to setup the Endpoint we will use post http metthod
+
+>postMan -> for posting file
+            >select post 
+            > select form-data
+            >provide key value pair
+
+
+EX-1>--------
+const multer = require('multer')
+const upload = multer({
+    dest:"images"//note-1
+})
+
+app.post("/upload",upload.single("upload"),(req,res)=>{
+    res.send()
+})
+
+note-1 dest:will automaticaly create one folder 
+        in rood dir to store the data"
+
+upload.single("upload")--same value need to provide in postman as KEY
+
+
+EX-2>-----------user.js/route---------
+
+const upload=multer({
+    dest:"avatars"
+})
+router.post("/users/me/avatar",upload.single("avatars"),(req,res)=>{
+    console.log("profile upload is working")
+    res.send()
+})
+----------------------------------
+
+
+
+------------------------124. Validating File Uploads--------------------------
+
+two thing to validate file size and file type
+
+const upload = multer({
+    dest:"images",
+    limits:{
+        fileSize:1000000//1 mega bit
+    }
+})
+
+here limits ovj contain fileSize- which restrict user to upload 
+larger size file
+
+
+EX-4>------------fileFilter---------------
+
+fileFilter(req,file,cd){
+
+    }
+req-contain req been made 
+file - it contain info about file uploaded
+cb- to tell multer when we are done filtering the file
+        cb-callback function
+        -if something went wrong we want to send error 
+        we pass that error to callback function
+
+fileFilter(req,file,cd){
+    cb(new Error("File must be a pdf "))
+    cb(undefined,true)//notes-1//accept upload
+    cd(undefined,false)//notes-2//reject upload
+}
+
+note1- 1st argument (undefined= nothing went wrong)
+        2nd argument (boolian) true== when value is accepted
+
+note-2-  2nd argument (boolian) false== when value is not accepted
+
+site-https://regex101.com/
+for reqular expration
+    -\.(doc|docx)$
+    $-end 
+
+EX-5>--------pdf filter----------
+
+fileFilter(req,file,cd){
+if(!file.originalname.endsWith(".pdf")){
+    return cd(new Error("please upload a pdf "))
+}
+cd(undefined,true)
+
+file.originalname.endsWith(".pdf")-- to check file extention
+
+
+EX-6>-------filter Wordfile----------------
+fileFilter(req,file,cd){
+if(!file.originalname.match(/\.(doc|docx)$/)){//note-1
+    return cd(new Error("please upload a word document "))
+}
+cd(undefined,true)
+}
+
+it fill only accept word file only(doc|docx)
+note-1 for regular exp ref site-https://regex101.com/
+
+
+
+--------------------------126 Handling Express Errors------------------------------
+
+const errorMiddleware = (req,res,next)=>{
+    throw new Error("error from middleware")
+} 
+app.post("/upload",errorMiddleware,(req,res)=>{
+    res.send() 
+},(error,req,res,next)=>{
+    res.status(400).send({error:error.message})
+})
+
+Notes:-app.post contain4 argument
+    1st>url
+    2nd>middleware function
+    3> callback function for sending req,res
+    4> callback function for error handleing
+        >contain 4 parameter
+            1> error
+            2> req
+            3> res
+            4> next
+
+O/P> if any thing went wrong 
+    >error from middleware
+
+
+-------------------------------127. Adding Images to User Profile-----------------------------
+
+relating profile pic with user
+ step 1> add auth middleware
+
+
+
+
+
+ -------To view the image which is stored in db in buffer formate-------
+
+  <img src="data:image/jpg;base64,buffer-data/>
+   need to specify data type and file extention
+   after ; is incoding
+   - our data is base64 incoded-which remove spacial char which cause problem with url
+   in img tag 1st we have to define what kind of data  show browser is awaire of thisismynewcource
+   then we provide the data 
+
+
+
+--------------------------128. Serving up Files------------------------
+
+to read the file like we use img tag to read the data of image buffer
+    >ref site->jsbin.com
+
+
+router.get("/users/:id/avatar",async(req,res)=>{
+    try{
+        const user =  await User.findById(req.params.id)
+
+        if(!user || !user.avatar){//note-1
+            throw new Error()
+        }
+
+        res.set("Content-Type","image/jpg")//notes-2
+        res.send(user.avatar)
+
+    }catch(e){
+        res.status(400).send()
+    }
+})
+
+
+note-1 if user is there with user.avatar prop is not there 
+        throw error which will jump in catch block
+
+        res.set("Content-Type","image/jpg")
+        to set the content tupe of given url
+
+        res-send(user.avatar)
+
+notes-1----seting responce header
+           -res.set contain 2 argument (key value pair)
+        1st argument (Content-Type)- name of the res header want to set
+        2nd argument (image/jpg)- the value to set on it  
+                - if we send json express automatically set or by default set 2nd argument
+                 as(application/json)
+Check the O/P at browser level
+    -enter the url http://localhost:3000/users/61fb8dd2845740733c58a54e/avatar
+        or
+   -to check in html page 
+    <img src="http://localhost:3000/users/61fb8dd2845740733c58a54e/avatar"/>
+
+
+----------------------129. Auto-Cropping and Image Formatting------------------------
+
+to reduce the size of profile pic to an specific size
+
+
+npm i sharp@0.21.1
+npm sharp-(resizeing images and converting there formates)
+        The typical use case for this high speed Node.js module is to 
+        convert large images in common formats to smaller, web-friendly 
+        JPEG, PNG, WebP, GIF and AVIF images of varying dimensions.
+        - sharp is syncronous
+
+EX-1>
+const buffer=await sharp(req.file.buffer).resize({ width:250 ,height:250}).png().toBuffer()
+req.user.avatar= buffer// storing data to db (model)
+    
+    await req.user.save()
+    res.send()
+
+resize for giving some fileSize
+.pmg()- to convert image type
+.toBuffer() to convert in to buffer formate
+
+
+----------------------1. Exploring SendGrid-------------------------------
+ ref--https://sendgrid.com/
+
+
+ const sgMail = require('@sendgrid/mail')
+
+const sendgridAPIKey='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'
+
+sgMail.setApiKey(sendgridAPIKey)//to sendgrid for which api we are going to work
+
+sgMail.send()// to send email
+
+sgMail.send({
+
+})
+
+
+
+ref :--https://app.sendgrid.com/settings/sender_auth/senders
+
+
+
+-----------------------132. Sending Welcome and Cancelation Emails---------------------------------
+
+
+EX-1>
+
+const sgMail = require('@sendgrid/mail')
+
+// const sendgridAPIKey='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'
+const sendgridAPIKey='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'
+
+sgMail.setApiKey(sendgridAPIKey)//to sendgrid for which api we are going to work
+
+const sendWelcomeEmail =(email,name)=>{
+    sgMail.send({
+        to:email,
+        from:"vishwajeetkumarb438@gmail.com",
+        subject:"Thanks for joining in!",
+        text:`Welcome to app, ${name}. let me know how you get along with the app.`,
+        html:""
+    })
+}
+
+module.exports={
+    sendWelcomeEmail
+}
+
+call sendWelcomeEmail in user module passing name and eamil as argument
+
+
+-------------------------133. Environment Variables-----------------------------
+
+Imp of Enviroment variabel 
+    >1st security
+            while deploying code we put our code in git hub 
+            where any one can see our key (sendgrid)
+            which mey couse problem in higher project
+
+    >2nd customization
+        help us to customize the connection string (api)
+        which is running localiy in our system
+        need to customiz before deploying application
+
+
+dev.env- it is file which contain key value pair one in each line
+
+
+env-cmd
+    A simple node program for executing commands using an environment from an env file.
+    help us to config execution of program for each system linux,mac,window
+
+    >npm i env-cmd@8.0.2 --save-dev  
+    --seve-dev to store localy in our machin not want to deploy
+
+s1> create folder config in root dir
+s2> create file dev.env - write key value pair needed
+
+
+set package.json as bello
+"scripts": {
+    "start": "node src/index.js",
+    "dev": "env-cmd ./config/dev.env nodemon src/index.js"
+  }
+
+
+  what it do?
+  enc-cmd ./config/dev.env grab all variable in file
+  and provide to index.js main file
+
+  so post no further is undefined
+
+  we have to run program again when ever we change env variabel
+  
