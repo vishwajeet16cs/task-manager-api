@@ -38,15 +38,8 @@ router.get('/tasks',auth,async (req,res)=>{
     
     if(req.query.sortBy){
         const parts=req.query.sortBy.split(':')
-        const partscheck=req.query.sortBy.split()
-        const partscheck2=req.query.sortBy
-        console.log(partscheck)//[ 'createdAt:desc' ]
-        console.log(partscheck2)//createdAt:desc
-        console.log(parts)//[ 'createdAt', 'desc' ]
+       
         sort[parts[0]] = parts[1] === 'desc' ? -1 :1
-        console.log(sort[parts[0]])//-1
-        console.log(parts[1])//desc
-        console.log(parts[0])//createdAt
     }
 
     try{
@@ -120,12 +113,12 @@ router.delete("/tasks/:id",auth,async (req,res)=>{
         const task =await Task.findOneAndDelete({_id:req.params.id,owner:req.user._id})
 
         if(!task){
-            res.status(400).send({error:"no user found"})
+            res.status(404).send({error:"no user found"})
         }
          res.send(task)
     }
     catch(e){
-        res.status(500).send(e);
+        res.status(500).send();
     }
 
 })

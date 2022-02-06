@@ -62,6 +62,8 @@ router.post("/users/logoutAll",auth,async(req,res)=>{
     }
 })
 router.get('/users/me',auth,async(req,res)=>{
+    console.log(req.user)
+    console.log("inside users")
     res.send(req.user)
 })
 
@@ -97,7 +99,7 @@ router.patch("/users/me",auth,async (req,res)=>{
 
 
 router.delete("/users/me",auth,async (req,res)=>{
-
+    // console.log("inside delete")
     try{
         await req.user.remove()
         sendCancelationEmail(req.user.email,req.user.name)

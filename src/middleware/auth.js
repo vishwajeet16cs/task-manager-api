@@ -3,10 +3,12 @@ const User = require("../models/user")
 
 const auth = async(req,res,next)=>{
     try{
+        // console.log("hello midil ware")
         const tocken = req.header("Authorization").replace("Bearer ","")
-        const decoded=jwt.verify(tocken,JWT_SECRET)
+        const decoded=jwt.verify(tocken,process.env.JWT_SECRET)
         // console.log(decoded)
         const user = await User.findOne({ _id:decoded._id,"tockens.tocken":tocken})
+        
         // console.log(user)
         if(!user){
             throw new Error

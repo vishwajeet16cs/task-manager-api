@@ -1160,5 +1160,507 @@ set package.json as bello
 
   so post no further is undefined
 
-  we have to run program again when ever we change env variabel
-  
+  NOTES-we have to run program again when ever we change env variabel
+
+SENDGRID_API_KEY=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
+
+Notes- value of key should not corted under ("")
+
+------------134. Creating a Production MongoDB Database-----------------
+
+mongodb atlas
+
+
+ref-https://www.mongodb.com/atlas/database
+ref-2-https://cloud.mongodb.com/v2/61fcfae34fcfa14d91be04ad#clusters/edit?filter=starter
+
+
+
+------------------135. Heroku Deployment---------------------------------------------------
+
+command to create heroku deploying sit
+heroku create vishwajeet-task-manager
+https://vishwajeet-task-manager.herokuapp.com/ 
+
+ https://git.heroku.com/vishwajeet-task-manager.git
+
+
+command 
+ set up environment variable
+        >heroku config:set key=value
+ to check environment variable config
+        >heroku config
+
+to remove environment variable
+    >heroku config:unset key 
+
+to set JWT-KEy environment variable
+
+    >heroku config:set JWT_SECRET=thisismynewcource
+
+
+
+---------------------
+ »   Warning: heroku update available from 7.53.0 to 
+ »   7.59.2.
+Setting MONGODB_URL and restarting ⬢ sheltered-spire-09293... done, v6
+MONGODB_URL: mongodb+srv://taskapp:Change@1nce@cluster0.
+bghyo.mongodb.net/task-mamager-api?retryWrites=true&w=majority  
+--------------------------------
+
+to deplpoy the code --git push heroku main 
+
+
+------------------------137. Jest Testing Framework----------------------------
+ 
+ "mocha" and "jest" are the best for write there test cases for the nodejs project
+
+ref-https://mochajs.org/
+ref-->https://jestjs.io/
+     Framework for testing
+
+npm i jest@23.6.0--save-dev ---install as local depency(not for production surver)
+
+"devDependencies": {
+    "env-cmd": "^8.0.2",
+    "jest": "^23.6.0",
+    "nodemon": "^1.18.9"
+  }
+
+  it will install as devDependencies in package.json file
+
+step-1> create one script in scripts in package.json
+        -"test":"jest"
+
+step-2> npm text (run in terminal)
+
+step-3> create new folder (tests) in root dir
+
+step-4> create math.test.js in tests dir
+
+step-5>Write some test code 
+
+EX-1-------------------------------
+test("Hello world!",()=>{
+
+})
+
+test("This should fail",()=>{
+    throw new Error("FAilure!")
+})
+
+
+O/p
+ FAIL  tests/math.test.js
+  √ Hello world! (1ms)
+  × This should fail (6ms)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        1.919s, estimated 2s
+Ran all test suites.
+
+Why test?
+    -save time
+    -creates reliable software
+    -Give flexibility to developers
+        -Refactoring
+        -Collaborating
+        -Profiling
+    -Peace of mind
+
+-----------------------138. Writing Tests and Assertions--------------------------
+
+EX-1
+---------math.test.js------------------
+const {calculateTip} =require("../src/math")
+
+test("Should calculate total with tip",()=>{
+    const total = calculateTip(10,.3)
+
+    if(total!=13){
+        throw new Error(`Total tips should be 13. Got ${total}`)
+    }
+})
+
+-----------------math.js-------
+
+const {calculateTip} =require("../src/math")
+
+test("Should calculate total with tip",()=>{
+    const total = calculateTip(10,.3)
+
+    if(total!=13){
+        throw new Error(`Total tips should be 13. Got ${total}`)
+    }
+})
+
+
+
+O/P
+
+ PASS  tests/math.test.js            \NodeJs\UdemyNodejs\mongodb>
+  √ Should calculate total with tip (1ms)
+
+Test Suites: 1 passed, 1 total       
+Tests:       1 passed, 1 total       
+Snapshots:   0 total
+Time:        2.211s
+Ran all test suites.
+
+
+O/P > if miss calculation 
+
+FAIL  tests/math.test.js
+× Should calculate total with tip (7ms)
+
+Test Suites: 1 failed, 1 total       
+Tests:       1 failed, 1 total       
+Snapshots:   0 total
+Time:        1.901s, estimated 2s    
+Ran all test suites.
+
+ref--https://jestjs.io/docs/expect
+
+EX-3
+
+const {calculateTip} =require("../src/math")
+
+test("Should calculate total with tip",()=>{
+    const total = calculateTip(10,.3)
+    expect(total).toBe(13)
+})
+
+O/p
+   FAIL  tests/math.test.js
+  × Should calculate total with tip (6ms)
+  Expected: 13
+  Received: 14
+
+
+expect(total).toBe(13)
+    -total should be 13 else it will throw error
+    -Make thing nice and simple
+
+EX-4>--also check for default value
+
+const {calculateTip} =require("../src/math")
+
+test("Should calculate total with tip",()=>{
+    const total = calculateTip(10,.3)
+    expect(total).toBe(13)
+})
+
+//default check
+test("Should calculate with default tip",()=>{
+    const total = calculateTip(10)
+    expect(total).toBe(12.5)
+})
+
+---------------139. Write Your Own Tests-------------------------
+
+chalange code link
+ref:-https://links.mead.io/nodetest
+
+--------------140. Testing Asynchronous Code----------------------
+
+--watch mode set up
+    ref-https://jestjs.io/docs/cli
+
+EX-1>
+
+test("Async test demo",()=>{
+    setTimeout(()=>{
+        expect(1).toBe(2)
+    },2000)
+})
+
+O/P>
+ √ Async test demo
+ which is in correct
+ here jase don't wait for 2sec give O/P in less then 2sec 
+to over come this we need to tell jase it is async code  
+
+EX-2
+test("Async test demo",(done )=>{
+    setTimeout(()=>{
+        expect(1).toBe(2)
+        done()
+    },2000)
+})
+
+O/p
+× Async test demo (2053ms)
+
+here until done is not call function will not give result 
+so it check async function also by calling inside async function
+done function can be given diff name        
+    
+EX-3>
+----------math.js--
+const add =(a,b)=>{
+    return new Promise((resolve,reject)=>{
+        setTimeout(()=>{
+            if(a<0||b<0){
+                return reject("NUmber must be non-negative")
+            }
+                resolve(a+b)
+        },2000)
+    })
+}
+
+--------math.test.js-----------------
+test("should add to number",(done)=>{
+    add(2,3).then((sum)=>{
+        expect(sum).toBe(5)
+        done()
+    })
+})
+
+O/P 
+  √ should add to number (2005ms)
+
+
+EX-4> other wey to hendal async function
+
+test("Should add two numbers async/awiat",async()=>{
+    const sum= await add(10,22)
+    expect(sum).toBe(32)
+})
+
+O/P
+ √ Should add two numbers async/awiat (2004ms)
+
+
+--------------------141. Testing an Express Application: Part I-----------------
+
+step 1> create text.env file in src/config dir
+
+step 2> At the end of mongodb url add test
+        MONGODB_URL=mongodb://127.0.0.1:27017/task-manager-api-test 
+        text env is using one database in our mongodb server
+        and dev env is using another 
+        makeing sure they are not interacting each other DATA
+
+step 3> changes in package.json file scripts
+        "test":"env-cmd ./config/test.env jest --watch"
+        to load  in correct env
+
+step 4> add new property in package.json
+        "jest":{
+            "testEnvironment":"node"
+         }
+         can add any where but add bellow the scripts
+         ref-https://jestjs.io/docs/configuration
+            -testEnvironment
+
+
+------------------142. Testing an Express Application: Part II----------------
+
+we will use jest to test one of the end points
+    There is 2 way it to be done
+        1st- start exp server at port 3000
+            -use http exp library 
+
+-------------------self check----------------------
+const request = require('supertest');
+const assert = require('assert');
+const express = require('express');
+
+const app = express();
+
+app.get('/user', function(req, res) {
+  res.status(200).json({ name: 'john' });
+});
+---------------------------------------------------
+
+ Supertest- provide a high-level abstraction for testing HTTP, 
+            while still allowing you to drop down to the lower-level API 
+            provided by superagen
+            
+npm i supertest@3.4.1 --save-dev
+
+step-1> create app.js in src dir
+
+step-2> Copy aathing from index.js to app.js
+        do some change remove listenport 
+
+        app.js set as an express application and exports app
+step-3> load express app in index.js 
+        (const app = require('./app'))
+
+step-4> remove some un wanted thing
+
+
+Notes- above set up is for
+        allow us to access the express application
+        Without unnecessary calling app.listen
+
+MONGODB_URL=mongodb://127.0.0.1:27017/task-manager-api-test
+    at the end of url we have task-manager-api-test 
+    which is the name of data base 
+    if it is not created it will create by own when we run the peogram
+
+
+EX-1>
+
+const request = require('supertest')
+const app=require('../src/app')
+
+test("Should signup a new user",async()=>{
+    await request(app).post("/users").send({
+        name:"alfaz",
+        email:"alfaz1@gmail.com",
+        password:"1234567"
+    }).expect(201)
+})
+
+here it is checking for 201 1 res if it is there test case will pass or else fail
+and also it is storing data in test data base "task-manager-api-test"
+
+
+-------------------------143. Jest Setup and Teardown----------------------------
+
+ref -https://jestjs.io/docs/setup-teardown
+
+jest life-cycle method
+
+EX-1>
+
+const request = require('supertest')
+const app=require('../src/app')
+
+beforeEach(()=>{
+    console.log("before each")
+})
+afterEach(()=>{
+    console.log("After Each")
+})
+
+test("Should signup a new user",async()=>{
+    await request(app).post("/users").send({
+        name:"alfaz",
+        email:"alfaz11@gmail.com",
+        password:"1234567"
+    }).expect(201)
+})
+
+O/P
+  before each
+    console.log src/models/user.js:108
+      just beffore saving!
+    console.log src/emails/account.js:7
+      inside welcome email
+    console.log src/models/user.js:108
+      just beffore saving!
+    console.log tests/user.test.js:8
+      After Each
+
+1st before each executed then after test function executed
+at last afterEach 
+ befforeEach-->test()-->afterEach
+
+
+ EX-2>-- clear db before running test function
+
+ beforeEach(async()=>{
+    await User.deleteMany()
+    await new User(userOne).save()
+})
+
+test("Should signup a new user",async()=>{
+    await request(app).post("/users").send({
+        name:"alfaz",
+        email:"alfaz11@gmail.com",
+        password:"1234567"
+    }).expect(201)
+})
+
+EX-3>--login test case---
+
+test("Should login existing user",async()=>{
+    await request(app).post("/users/login").send({
+        email:userOne.email,
+        password:userOne.password
+    }).expect(200)
+})
+
+
+--------------144. Testing with Authentication----------------
+
+EX-1>
+
+test("Should delete account for user",async()=>{
+    await request(app)
+    .delete("/users/me")
+    .set("Authorization",`Bearer ${userOne.tockens[0].tocken}`)// provide header
+    .send()
+    .expect(200)
+})
+
+----------------145. Advanced Assertions-----------------------
+
+EX-1>
+match single prop of obj
+expect(response.body.user.name).toBe("alfaz")
+
+match obj ----no need to match every props 
+but what ever we match should be exact
+
+//Assertions about the response
+expect(response.body).toMatchObject({
+    user:{
+        name:"alfaz",
+        email:"alfaz11@gmail.com"
+    },
+    tocken:user.tockens[0].tocken
+})
+
+
+------------------146. Mocking Libraries-------------------
+
+
+
+
+
+------------------147. Wrapping up User Tests---------------
+
+expect({}).toBe({})
+
+O/P>
+expect(received).toBe(expected) // Object.is equality   
+
+    Expected: {}
+    Received: {}
+
+here toBe(===)
+1===1 //true
+{}==={}//false
+
+
+above problem can be over come by (toEquqal() method)
+expect({}).toEquqal({})
+
+
+EX-2>
+
+
+expect(user.avatar).toEqual(expect.any(Buffer))
+
+toEqual for maching property 
+expect.any(Buffer)-- user.avatar should be buffer 
+expect.any(String)-- user.avatar should be string
+
+EX-3>user name is  amarjeet
+
+expect(user.name).toBe("Amarjeet")
+expect(user.name).toEqual("Amarjeet")
+
+here both will work O/P is pass test case
+
+---------------------150 Bonus: Extra Test Ideas----------------------
+
+ref:-https://gist.github.com/andrewjmead/988d5965c609a641202600b073e54266
+
+ref short-https://links.mead.io/extratests
